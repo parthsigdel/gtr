@@ -1,8 +1,10 @@
-
-Repo is still in draft — messy, unorganised, and far from production standard. Keeping AI assistance to almost zero to maximise learning. 
+> ***Repo is still in draft — messy, unorganised, and far from production standard. Keeping AI assistance to almost zero at this point to maximise learning.***
 
 ## What Gtr is?
-A terminal client for GitHub notifications, issues, PRs, and reviews — auth token stays local, nothing touches a server.
+A terminal client for GitHub notifications, issues, PRs, and reviews. 
+
+#### Privacy & Trust-First CLI
+Your auth token stays local (on your machine). It is never sent to any server — all communication happens directly between your machine and GitHub's API. Nothing is logged, proxied, or stored remotely. Revoke access anytime from your [GitHub settings](https://github.com/settings/applications).
 
 ## Current features
 -> List notifications, issues, PRs, and reviews

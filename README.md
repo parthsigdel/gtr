@@ -1,4 +1,4 @@
-> ***Gtr's repo is still in draft — messy, unorganised, and far from production standard. Keeping AI assistance to almost zero at this point to maximise learning.***
+> ***Gtr's repo is still in draft — messy, unorganised, and far from production standard. AI assistance has been kept close to zero so far, to maximise learning.***
 
 
 # 

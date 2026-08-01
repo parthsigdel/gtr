@@ -6,8 +6,11 @@ A terminal client for GitHub notifications, issues, PRs, and reviews — auth to
 
 ## Current features
 -> List notifications, issues, PRs, and reviews
--> View detailed descriptions 
+
+-> View detailed descriptions
+
 -> Open selected notification, issues, pr, or review in your browser. 
+
 -> Mark notification as read (straight from your terminal).
 
 ## Installation

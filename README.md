@@ -1,4 +1,12 @@
-> ***Repo is still in draft — messy, unorganised, and far from production standard. Keeping AI assistance to almost zero at this point to maximise learning.***
+> ***Gtr's repo is still in draft — messy, unorganised, and far from production standard. Keeping AI assistance to almost zero at this point to maximise learning.***
+
+
+# 
+
+
+https://github.com/user-attachments/assets/3c291a2a-8da3-4090-943f-9fc82a9e2efa
+
+
 
 ## What Gtr is?
 A terminal client for GitHub notifications, issues, PRs, and reviews. 

@@ -28,7 +28,7 @@ Your auth token stays local (on your machine). It is never sent to any server â€
 Requires - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 
 ```
-git clone https://github.com/CoderParth/gtr.git
+git clone https://github.com/parthsigdel/gtr.git
 cd gtr
 dotnet run
 ```

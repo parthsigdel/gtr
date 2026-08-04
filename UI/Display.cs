@@ -29,15 +29,17 @@ public static class Display
             color: ColorPrs,
             breadcrumb: $"[[p]] PRs  >  #{pr.Number}",
             title: pr.Title,
-            meta: $"{pr.State} · {ParseOwnerAndRepoName(pr.RepositoryUrl)} · opened {GetAgoTime(pr.CreatedAt)}",
+            meta: $"{pr.State} · {ParseOwnerAndRepoName(pr.RepositoryUrl)} · opened {GetAgoTime(pr.CreatedAt)} · Draft: {pr.Draft}",
             body: pr.Body,
             tags: Labels(pr.Labels),
-            footer: "o open in browser   b back   q quit"
+            footer: $"o open in browser  c {FormatChangePrStatus(pr.Draft)}   b back   q quit"
             ));
             grids.Add(grid);
         }
         return grids;
     }
+
+
 
     public static List<Grid> ReviewDescription(ReviewItem[] reviews)
     {
@@ -288,6 +290,12 @@ public static class Display
         return formattedAssignees.ToString();
     }
 
+    public static string FormatChangePrStatus(bool isDraft)
+    {
+        if (isDraft) return "Mark as ready for review";
+        return "Convert to draft";
+    }
+
     public static string HumanizedReason(string reason)
     {
         switch (reason)
@@ -320,5 +328,7 @@ public static class Display
                 return "Notification";
         }
     }
+
+
 }
 

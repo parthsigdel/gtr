@@ -83,6 +83,7 @@ public static class Program
             bool finalPageMode = false;
             string urlToOpen = ""; // this gets assigned a new value when the user reaches the final page. 
             string notificationId = ""; // a record of which notification the user is looking at - use this id to mark as read. 
+            // string prId = ""; // Id of a pr that the user may be currently viewing - in the final page mode. 
 
             var prs = Display.Prs(openPrs.Items, currIdx);
             var prDescriptions = Display.PrDescriptions(openPrs.Items);
@@ -385,6 +386,35 @@ public static class Program
                                             FileName = urlToOpen,
                                             UseShellExecute = true
                                         });
+                                        break;
+
+                                    case ConsoleKey.C:
+                                        if (!finalPageMode && currTab != 'p') break;
+                                        try
+                                        {
+
+                                            var prId = openPrs.Items[currIdx].NodeId;
+                                            bool isDraft = openPrs.Items[currIdx].Draft;
+                                            if (isDraft)
+                                            {
+                                                await Repo.ChangePrStatus(prId, Repo.PrStatus.Ready);
+                                            }
+                                            else
+                                            {
+                                                await Repo.ChangePrStatus(prId, Repo.PrStatus.Draft);
+                                            }
+                                        }
+                                        catch (Exception)
+                                        {
+                                            ctx.UpdateTarget(new Markup($"{notificationId} Something went wrong. Please try again."));
+                                            await Task.Delay(TimeSpan.FromSeconds(3));
+                                        }
+
+                                        openPrs = await Repo.GetOpenPrs() ?? openPrs;
+                                        prs = Display.Prs(openPrs.Items, currIdx);
+                                        prDescriptions = Display.PrDescriptions(openPrs.Items);
+                                        descriptionPage = prDescriptions[currIdx];
+                                        ctx.UpdateTarget(new Rows(descriptionPage));
                                         break;
                                 }
                             }

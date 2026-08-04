@@ -1,5 +1,6 @@
 namespace Gtr.Api;
 
+using System.Text;
 using System.Net.Http.Json;
 
 using static Gtr.Http.GitHubClient;
@@ -10,6 +11,12 @@ public static class Repo
     private const string OpenPrsUrl = "https://api.github.com/search/issues?q=is:pr+is:open+author:@me";
     private const string OpenReviewsUrl = "https://api.github.com/search/issues?q=is:pr+is:open+review-requested:@me";
     private const string OpenIssuesUrl = "https://api.github.com/search/issues?q=is:issue+is:open+assignee:@me";
+    private const string GithubGraphqlUrl = "https://api.github.com/graphql";
+    public enum PrStatus
+    {
+        Draft,
+        Ready
+    }
 
     public static async Task<OpenPrs?> GetOpenPrs()
     {
@@ -18,7 +25,6 @@ public static class Repo
         var OpenPrs = await res.Content.ReadFromJsonAsync<OpenPrs>(SnakeCaseOptions);
         return OpenPrs;
     }
-
 
     public static async Task<OpenReviews?> GetOpenReviews()
     {
@@ -44,5 +50,21 @@ public static class Repo
         res.EnsureSuccessStatusCode();
         var openIssues = await res.Content.ReadFromJsonAsync<OpenIssues>(SnakeCaseOptions);
         return openIssues;
+    }
+
+    public static async Task ChangePrStatus(string id, PrStatus changeTo)
+    {
+        string payload;
+        if (changeTo == PrStatus.Ready)
+        {
+            payload = $$"""{"query": "mutation {markPullRequestReadyForReview(input: {pullRequestId: \"{{id}}\"}) {pullRequest { id isDraft } } }"}""";
+        }
+        else
+        {
+            payload = $$"""{"query": "mutation {convertPullRequestToDraft(input: {pullRequestId: \"{{id}}\"}) {pullRequest { id isDraft } } }"}""";
+        }
+        var content = new StringContent(payload, Encoding.UTF8, "application/json");
+        var res = await GhClient.PostAsync(GithubGraphqlUrl, content);
+        res.EnsureSuccessStatusCode();
     }
 }

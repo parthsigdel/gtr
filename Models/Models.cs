@@ -4,7 +4,7 @@ public class Models { }
 
 // PRs
 public record OpenPrs(int TotalCount, PrItem[] Items);
-public record PrItem(int Number, string Title, string HtmlUrl,
+public record PrItem(string NodeId, int Number, string Title, string HtmlUrl,
         string State, string RepositoryUrl, DateTimeOffset CreatedAt,
         string Body, Label[] Labels, bool Draft);
 

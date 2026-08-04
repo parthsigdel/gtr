@@ -1,5 +1,6 @@
 namespace Gtr.Api;
 
+using System.Text;
 using System.Net.Http.Json;
 
 using static Gtr.Http.GitHubClient;
@@ -24,7 +25,6 @@ public static class Repo
         var OpenPrs = await res.Content.ReadFromJsonAsync<OpenPrs>(SnakeCaseOptions);
         return OpenPrs;
     }
-
 
     public static async Task<OpenReviews?> GetOpenReviews()
     {
@@ -57,13 +57,14 @@ public static class Repo
         string payload;
         if (changeTo == PrStatus.Ready)
         {
-            payload = $$"""{"query": "mutation {markPullRequestReadyForReview(input: {pullRequestId: "{{id}}"}) {pullRequest { id isDraft } } }"}""";
+            payload = $$"""{"query": "mutation {markPullRequestReadyForReview(input: {pullRequestId: \"{{id}}\"}) {pullRequest { id isDraft } } }"}""";
         }
         else
         {
-            payload = $$"""{"query": "mutation {convertPullRequestToDraft(input: {pullRequestId: "{{id}}"}) {pullRequest { id isDraft } } }"}""";
+            payload = $$"""{"query": "mutation {convertPullRequestToDraft(input: {pullRequestId: \"{{id}}\"}) {pullRequest { id isDraft } } }"}""";
         }
-        var res = await GhClient.PostAsJsonAsync(GithubGraphqlUrl, payload);
+        var content = new StringContent(payload, Encoding.UTF8, "application/json");
+        var res = await GhClient.PostAsync(GithubGraphqlUrl, content);
         res.EnsureSuccessStatusCode();
     }
 }

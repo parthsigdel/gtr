@@ -329,6 +329,10 @@ public static class Display
         }
     }
 
-
+    public static string CustomSpinner(ref int i)
+    {
+        var frames = Spinner.Known.Dots.Frames;
+        return frames[i++ % frames.Count];
+    }
 }
 

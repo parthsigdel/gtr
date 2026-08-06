@@ -390,23 +390,34 @@ public static class Program
 
                                     case ConsoleKey.C:
                                         if (!finalPageMode && currTab != 'p') break;
+
+                                        var prId = openPrs.Items[currIdx].NodeId;
+                                        bool isDraft = openPrs.Items[currIdx].Draft;
+                                        var changePrStatusTask = Task.CompletedTask;
+                                        string message;
+                                        if (isDraft)
+                                        {
+                                            changePrStatusTask = Repo.ChangePrStatus(prId, Repo.PrStatus.Ready);
+                                            message = "Marking as ready for review";
+                                        }
+                                        else
+                                        {
+                                            changePrStatusTask = Repo.ChangePrStatus(prId, Repo.PrStatus.Draft);
+                                            message = "Converting to draft";
+                                        }
+
                                         try
                                         {
-
-                                            var prId = openPrs.Items[currIdx].NodeId;
-                                            bool isDraft = openPrs.Items[currIdx].Draft;
-                                            if (isDraft)
+                                            int i = 0;
+                                            while (!changePrStatusTask.IsCompleted)
                                             {
-                                                await Repo.ChangePrStatus(prId, Repo.PrStatus.Ready);
+                                                ctx.UpdateTarget(new Markup($"{Display.CustomSpinner(ref i)} {message}"));
                                             }
-                                            else
-                                            {
-                                                await Repo.ChangePrStatus(prId, Repo.PrStatus.Draft);
-                                            }
+                                            await changePrStatusTask;
                                         }
-                                        catch (Exception)
+                                        catch (Exception e)
                                         {
-                                            ctx.UpdateTarget(new Markup($"{notificationId} Something went wrong. Please try again."));
+                                            ctx.UpdateTarget(new Markup($"Error: {e.Message}"));
                                             await Task.Delay(TimeSpan.FromSeconds(3));
                                         }
 

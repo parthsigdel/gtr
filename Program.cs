@@ -427,6 +427,43 @@ public static class Program
                                         descriptionPage = prDescriptions[currIdx];
                                         ctx.UpdateTarget(new Rows(descriptionPage));
                                         break;
+
+                                    case ConsoleKey.X:
+                                        if (!finalPageMode && currTab != 'p') break;
+                                        string repoUrl = openPrs.Items[currIdx].RepositoryUrl;
+                                        var repoParts = repoUrl.Split('/');
+                                        string repo = repoParts[repoParts.Length - 1];
+                                        string owner = repoParts[repoParts.Length - 2];
+                                        int pullNum = openPrs.Items[currIdx].Number;
+                                        var closePrTask = Repo.ClosePr(owner, repo, pullNum);
+
+                                        try
+                                        {
+                                            int i = 0;
+                                            while (!closePrTask.IsCompleted)
+                                            {
+                                                ctx.UpdateTarget(new Markup($"{Display.CustomSpinner(ref i)} {"Closing PR"}"));
+                                            }
+                                            await closePrTask;
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            ctx.UpdateTarget(new Markup($"Failed to close PR: {e.Message}"));
+                                            await Task.Delay(TimeSpan.FromSeconds(3));
+                                        }
+
+                                        finalPageMode = false;
+                                        urlToOpen = "";
+
+                                        var prTask = Repo.GetOpenPrs();
+                                        _ = prTask.ContinueWith(t =>
+                                        {
+                                            openPrs = t.Result ?? openPrs;
+                                            prs = Display.Prs(openPrs.Items, currIdx);
+                                            prDescriptions = Display.PrDescriptions(openPrs.Items);
+                                            RefreshUi();
+                                        });
+                                        break;
                                 }
                             }
                         }

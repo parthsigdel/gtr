@@ -74,4 +74,13 @@ public static class Repo
         var res = await GhClient.PatchAsJsonAsync($"{RepoBaseUrl}/{owner}/{repo}/pulls/{pullNumber}", new { state = "closed" });
         res.EnsureSuccessStatusCode();
     }
+
+    // Returns General discussion comments
+    public static async Task<Comment[]?> ViewPrComments(string owner, string repo, int pullNumber)
+    {
+        var res = await GhClient.GetAsync($"{RepoBaseUrl}/{owner}/{repo}/issues/{pullNumber}/comments");
+        res.EnsureSuccessStatusCode();
+        var comments = await res.Content.ReadFromJsonAsync<Comment[]>(SnakeCaseOptions);
+        return comments;
+    }
 }

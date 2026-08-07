@@ -6,6 +6,7 @@ using Gtr.Auth;
 using Gtr.UI;
 using Gtr.Api;
 using Gtr.Models;
+using Gtr.Utils;
 using static Gtr.Http.GitHubClient;
 
 namespace Gtr;
@@ -83,7 +84,6 @@ public static class Program
             bool finalPageMode = false;
             string urlToOpen = ""; // this gets assigned a new value when the user reaches the final page. 
             string notificationId = ""; // a record of which notification the user is looking at - use this id to mark as read. 
-            // string prId = ""; // Id of a pr that the user may be currently viewing - in the final page mode. 
 
             var prs = Display.Prs(openPrs.Items, currIdx);
             var prDescriptions = Display.PrDescriptions(openPrs.Items);
@@ -105,6 +105,7 @@ public static class Program
             /* Render */
             var rows = new Rows(tabs, tabInfo, helpText);
 
+            AnsiConsole.Clear();
             await AnsiConsole.Live(rows).StartAsync(async ctx =>
                 {
                     ctx.Refresh();
@@ -412,6 +413,7 @@ public static class Program
                                             while (!changePrStatusTask.IsCompleted)
                                             {
                                                 ctx.UpdateTarget(new Markup($"{Display.CustomSpinner(ref i)} {message}"));
+                                                await Task.Delay(80);// let the fetch actually progress and avoid pegging the CPU
                                             }
                                             await changePrStatusTask;
                                         }
@@ -429,41 +431,83 @@ public static class Program
                                         break;
 
                                     case ConsoleKey.X:
-                                        if (!finalPageMode && currTab != 'p') break;
-                                        string repoUrl = openPrs.Items[currIdx].RepositoryUrl;
-                                        var repoParts = repoUrl.Split('/');
-                                        string repo = repoParts[repoParts.Length - 1];
-                                        string owner = repoParts[repoParts.Length - 2];
-                                        int pullNum = openPrs.Items[currIdx].Number;
-                                        var closePrTask = Repo.ClosePr(owner, repo, pullNum);
-
-                                        try
                                         {
-                                            int i = 0;
-                                            while (!closePrTask.IsCompleted)
+                                            if (!finalPageMode && currTab != 'p') break;
+                                            string repoUrl = openPrs.Items[currIdx].RepositoryUrl;
+                                            var (repo, owner) = StringUtils.ParseRepoAndOwnerName(repoUrl);
+                                            int pullNum = openPrs.Items[currIdx].Number;
+                                            var closePrTask = Repo.ClosePr(owner, repo, pullNum);
+
+                                            try
                                             {
-                                                ctx.UpdateTarget(new Markup($"{Display.CustomSpinner(ref i)} {"Closing PR"}"));
+                                                int i = 0;
+                                                while (!closePrTask.IsCompleted)
+                                                {
+                                                    ctx.UpdateTarget(new Markup($"{Display.CustomSpinner(ref i)} Closing PR"));
+                                                    await Task.Delay(80);// let the fetch actually progress and avoid pegging the CPU
+                                                }
+                                                await closePrTask;
                                             }
-                                            await closePrTask;
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            ctx.UpdateTarget(new Markup($"Failed to close PR: {e.Message}"));
-                                            await Task.Delay(TimeSpan.FromSeconds(3));
+                                            catch (Exception e)
+                                            {
+                                                ctx.UpdateTarget(new Markup($"Failed to close PR: {Markup.Escape(e.Message)}"));
+                                                await Task.Delay(TimeSpan.FromSeconds(3));
+                                            }
+
+                                            finalPageMode = false;
+                                            urlToOpen = "";
+
+                                            var prTask = Repo.GetOpenPrs();
+                                            _ = prTask.ContinueWith(t =>
+                                            {
+                                                openPrs = t.Result ?? openPrs;
+                                                prs = Display.Prs(openPrs.Items, currIdx);
+                                                prDescriptions = Display.PrDescriptions(openPrs.Items);
+                                                RefreshUi();
+                                            });
+                                            break;
                                         }
 
-                                        finalPageMode = false;
-                                        urlToOpen = "";
-
-                                        var prTask = Repo.GetOpenPrs();
-                                        _ = prTask.ContinueWith(t =>
+                                    case ConsoleKey.V:
                                         {
-                                            openPrs = t.Result ?? openPrs;
-                                            prs = Display.Prs(openPrs.Items, currIdx);
-                                            prDescriptions = Display.PrDescriptions(openPrs.Items);
-                                            RefreshUi();
-                                        });
-                                        break;
+                                            if (!finalPageMode) break;
+                                            switch (currTab)
+                                            {
+                                                case 'p':  // view pr comments. 
+                                                    string repoUrl = openPrs.Items[currIdx].RepositoryUrl;
+                                                    var (repo, owner) = StringUtils.ParseRepoAndOwnerName(repoUrl);
+                                                    int pullNum = openPrs.Items[currIdx].Number;
+                                                    var viewCommentsTask = Repo.ViewPrComments(owner, repo, pullNum);
+                                                    var comments = Array.Empty<Comment>();
+
+                                                    try
+                                                    {
+                                                        int i = 0;
+                                                        while (!viewCommentsTask.IsCompleted)
+                                                        {
+                                                            ctx.UpdateTarget(new Markup($"{Display.CustomSpinner(ref i)} Fetching Comments"));
+                                                            await Task.Delay(80);// let the fetch actually progress and avoid pegging the CPU
+                                                        }
+                                                        comments = await viewCommentsTask ?? comments;
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        ctx.UpdateTarget(new Markup($"Failed to fetch comments: {Markup.Escape(e.Message)}"));
+                                                        await Task.Delay(TimeSpan.FromSeconds(3));
+                                                    }
+
+                                                    string prTitle = openPrs.Items[currIdx].Title;
+                                                    var commentView = Comments.View(comments,
+                                                            $"[[p]] PRs > #{pullNum} > Comments",
+                                                            prTitle);
+                                                    if (comments.Length > 0)
+                                                        // Temporary solution; Todo: navigate comments and assign urlToOpen accordingly. 
+                                                        urlToOpen = comments[0].HtmlUrl;
+                                                    ctx.UpdateTarget(new Rows(commentView));
+                                                    break;
+                                            }
+                                            break;
+                                        }
                                 }
                             }
                         }

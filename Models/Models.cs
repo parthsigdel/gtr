@@ -1,5 +1,7 @@
 namespace Gtr.Models;
 
+using System.Text.Json.Serialization;
+
 public class Models { }
 
 // PRs
@@ -32,4 +34,29 @@ public record Repository(string FullName, string HtmlUrl);
 public record Details(string Body);
 
 public record Label(string Name);
-public record User(string Login); // Login = Username
+public record User(string Login, string AvatarUrl); // Login = Username
+
+// Comments: General discussion comments
+// public record Comments(Comment[] comments);
+public record Comment(
+                long Id,
+                string HtmlUrl,
+                DateTimeOffset UpdatedAt,
+                User User,
+                string Body,
+                string AuthorAssociation,
+                Reaction Reactions
+);
+
+// Reactions
+public record Reaction(
+                int TotalCount,
+                [property: JsonPropertyName("+1")] int Plus1,
+                [property: JsonPropertyName("-1")] int Minus1,
+                int Laugh,
+                int Hooray,
+                int Confused,
+                int Heart,
+                int Rocket,
+                int Eyes
+);

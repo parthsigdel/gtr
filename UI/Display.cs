@@ -4,7 +4,9 @@ using Spectre.Console;
 using Spectre.Console.Rendering;
 using System.Text;
 
+
 using Gtr.Models;
+using Gtr.Utils;
 
 public static class Display
 {
@@ -29,10 +31,10 @@ public static class Display
             color: ColorPrs,
             breadcrumb: $"[[p]] PRs  >  #{pr.Number}",
             title: pr.Title,
-            meta: $"{pr.State} · {ParseOwnerAndRepoName(pr.RepositoryUrl)} · opened {GetAgoTime(pr.CreatedAt)} · Draft: {pr.Draft}",
+            meta: $"{pr.State} · {ParseOwnerAndRepoName(pr.RepositoryUrl)} · opened {StringUtils.GetAgoTime(pr.CreatedAt)} · Draft: {pr.Draft}",
             body: pr.Body,
             tags: Labels(pr.Labels),
-            footer: $"o open in browser  c {FormatChangePrStatus(pr.Draft)}  {showClosePrOption(pr.State)}  b back   q quit"
+            footer: $"o open in browser  c {FormatChangePrStatus(pr.Draft)}  {showClosePrOption(pr.State)}  v view comments  b back   q quit"
             ));
             grids.Add(grid);
         }
@@ -53,7 +55,7 @@ public static class Display
                 color: ColorReviews,
                 breadcrumb: $"[[r]] Reviews  >  #{review.Number}",
                 title: review.Title,
-                meta: $"review requested · {ParseRepoName(review.RepositoryUrl)}/{review.User.Login}  · requested {GetAgoTime(review.CreatedAt)} ",
+                meta: $"review requested · {ParseRepoName(review.RepositoryUrl)}/{review.User.Login}  · requested {StringUtils.GetAgoTime(review.CreatedAt)} ",
                 body: review.Body,
                 tags: $"[green]+{review.ChangeInfo.Additions}[/] [red]−{review.ChangeInfo.Deletions}[/] · [yellow]{review.ChangeInfo.ChangedFiles} files changed[/]",
                 footer: "o open in browser   b back   q quit"
@@ -74,7 +76,7 @@ public static class Display
                 color: ColorIssues,
                 breadcrumb: $"[[i]] Issues  >  #{issue.Number}",
                 title: issue.Title,
-                meta: $"{issue.State} · {ParseRepoName(issue.RepositoryUrl)}/{issue.User.Login}  · requested {GetAgoTime(issue.CreatedAt)}",
+                meta: $"{issue.State} · {ParseRepoName(issue.RepositoryUrl)}/{issue.User.Login}  · requested {StringUtils.GetAgoTime(issue.CreatedAt)}",
                 body: issue.Body,
                 tags: $"{Assignees(issue.Assignees)} · {Labels(issue.Labels)}",
                 footer: "o open in browser   b back   q quit"
@@ -95,7 +97,7 @@ public static class Display
                 color: ColorNotifications,
                 breadcrumb: $"[[n]] Notifications #{n.Subject.Url.Split('/').Last()}",
                 title: n.Subject.Title,
-                meta: $"{n.Subject.Type} ·  {n.Repository.FullName} · {GetAgoTime(n.UpdatedAt)}",
+                meta: $"{n.Subject.Type} ·  {n.Repository.FullName} · {StringUtils.GetAgoTime(n.UpdatedAt)}",
                 body: n.Details.Body,
                 tags: $" {HumanizedReason(n.Reason)}",
                 footer: "o open in browser   m mark as read   b back   q quit"
@@ -251,16 +253,6 @@ public static class Display
         return formattedLabels.ToString();
     }
 
-    public static string GetAgoTime(DateTimeOffset createdAt)
-    {
-        var diff = DateTimeOffset.UtcNow - createdAt;
-        string ago = diff.TotalDays >= 1
-            ? $"{(int)diff.TotalDays}d ago"
-            : diff.TotalHours >= 1
-                ? $"{(int)diff.TotalHours}h ago"
-                : $"{(int)diff.TotalMinutes}m ago";
-        return ago;
-    }
 
     public static string ParseOwnerAndRepoName(string repoUrl)
     {

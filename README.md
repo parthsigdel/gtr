@@ -1,4 +1,4 @@
-> ***Gtr's repo is still in draft — messy, unorganised, and far from production standard. AI assistance has been kept close to zero so far, to maximise learning.***
+> ***Gtr's repo is still in its early stages — messy, unorganised, and far from production standard. AI assistance has been kept close to zero so far to maximise learning.***
 
 
 # 
@@ -21,6 +21,8 @@ Your auth token stays local (on your machine). It is never sent to any server �
 
 -> Open selected notification, issues, pr, or review in your browser. 
 
+-> Close your PR or change it to draft from your terminal. 
+
 -> Mark notification as read (straight from your terminal).
 
 ## Installation
@@ -35,8 +37,6 @@ dotnet run
 
 
 ## TODO:
--> Add extra features: mark all notifications as read; approve,request-changes, or comment on a PR straight from the terminal 
-
 -> Heavy refactor (Crucial)
 
 -> Add tests (Crucial)

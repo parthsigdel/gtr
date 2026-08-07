@@ -32,7 +32,7 @@ public static class Display
             meta: $"{pr.State} · {ParseOwnerAndRepoName(pr.RepositoryUrl)} · opened {GetAgoTime(pr.CreatedAt)} · Draft: {pr.Draft}",
             body: pr.Body,
             tags: Labels(pr.Labels),
-            footer: $"o open in browser  c {FormatChangePrStatus(pr.Draft)}   b back   q quit"
+            footer: $"o open in browser  c {FormatChangePrStatus(pr.Draft)}  {showClosePrOption(pr.State)}  b back   q quit"
             ));
             grids.Add(grid);
         }
@@ -333,6 +333,13 @@ public static class Display
     {
         var frames = Spinner.Known.Dots.Frames;
         return frames[i++ % frames.Count];
+    }
+
+    public static string showClosePrOption(string state)
+    {
+        if (state == "open")
+            return "x close pr";
+        return "";
     }
 }
 

@@ -8,6 +8,7 @@ using Gtr.Models;
 
 public static class Repo
 {
+    private const string RepoBaseUrl = "https://api.github.com/repos";
     private const string OpenPrsUrl = "https://api.github.com/search/issues?q=is:pr+is:open+author:@me";
     private const string OpenReviewsUrl = "https://api.github.com/search/issues?q=is:pr+is:open+review-requested:@me";
     private const string OpenIssuesUrl = "https://api.github.com/search/issues?q=is:issue+is:open+assignee:@me";
@@ -65,6 +66,12 @@ public static class Repo
         }
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
         var res = await GhClient.PostAsync(GithubGraphqlUrl, content);
+        res.EnsureSuccessStatusCode();
+    }
+
+    public static async Task ClosePr(string owner, string repo, int pullNumber)
+    {
+        var res = await GhClient.PatchAsJsonAsync($"{RepoBaseUrl}/{owner}/{repo}/pulls/{pullNumber}", new { state = "closed" });
         res.EnsureSuccessStatusCode();
     }
 }

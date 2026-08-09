@@ -32,7 +32,9 @@ Requires - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 ```
 git clone https://github.com/parthsigdel/gtr.git
 cd gtr
-dotnet run
+dotnet run --project src/Gtr 
+# or you can use make 
+make run 
 ```
 
 

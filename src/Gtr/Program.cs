@@ -13,7 +13,6 @@ namespace Gtr;
 
 public static class Program
 {
-
     public static bool s_keepRunning = true;
     private static CancellationTokenSource? cts;
 

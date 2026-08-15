@@ -5,30 +5,34 @@ using System.Net.Http.Json;
 using static Gtr.Http.GitHubClient;
 using Gtr.Models;
 
-public static class NotificationApi
+public class NotificationApi
 {
+
+    private readonly HttpClient _http;
+    public NotificationApi(HttpClient http) => _http = http;
+
     private const string NotificationsUrl = "https://api.github.com/notifications";
     private const string MarkAsReadUrl = "https://api.github.com/notifications/threads";
 
-    public static async Task<Notification[]?> GetUnreadNotifications()
+    public async Task<Notification[]?> GetUnreadNotifications()
     {
-        var res = await GhClient.GetAsync(NotificationsUrl);
+        var res = await _http.GetAsync(NotificationsUrl);
         res.EnsureSuccessStatusCode();
         var unreadNotifications = await res.Content.ReadFromJsonAsync<Notification[]>(SnakeCaseOptions);
         return unreadNotifications;
     }
 
-    public static async Task<Details?> GetNotificationDetails(string subjectUrl)
+    public async Task<Details?> GetNotificationDetails(string subjectUrl)
     {
-        var res = await GhClient.GetAsync(subjectUrl);
+        var res = await _http.GetAsync(subjectUrl);
         res.EnsureSuccessStatusCode();
         var details = await res.Content.ReadFromJsonAsync<Details>(SnakeCaseOptions);
         return details;
     }
 
-    public static async Task MarkAsRead(string notificationId)
+    public async Task MarkAsRead(string notificationId)
     {
-        var res = await GhClient.PatchAsync($"{MarkAsReadUrl}/{notificationId}", null);
+        var res = await _http.PatchAsync($"{MarkAsReadUrl}/{notificationId}", null);
         res.EnsureSuccessStatusCode();
     }
 }

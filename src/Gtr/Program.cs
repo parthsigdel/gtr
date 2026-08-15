@@ -73,6 +73,10 @@ public static class Program
             GhClient.DefaultRequestHeaders.Add("User-Agent", "gt");
             GhClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
 
+            var Repo = new Repo(GhClient);
+            var NotificationApi = new NotificationApi(GhClient);
+
+
             var openPrs = new OpenPrs(0, Array.Empty<PrItem>());
             var openReviews = new OpenReviews(0, Array.Empty<ReviewItem>());
             var openIssues = new OpenIssues(0, Array.Empty<IssueItem>());

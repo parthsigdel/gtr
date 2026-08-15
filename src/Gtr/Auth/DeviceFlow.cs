@@ -6,10 +6,13 @@ using GitCredentialManager;
 
 using static Gtr.Http.GitHubClient;
 
-public static class DeviceFlow
+public class DeviceFlow
 {
+    private readonly HttpClient _http;
+    public DeviceFlow(HttpClient http) => _http = http;
+
     // return if operation was successful or not. 
-    public static async Task<bool> GenerateAccessToken(ICredentialStore store, bool s_keepRunning, CancellationTokenSource cts)
+    public async Task<bool> GenerateAccessToken(ICredentialStore store, bool s_keepRunning, CancellationTokenSource cts)
     {
         string newAccessToken;
 
@@ -60,7 +63,7 @@ public static class DeviceFlow
         return false;
     }
 
-    public static async Task<LoginResponse?> Login(string clientId, params string[] scopes)
+    public async Task<LoginResponse?> Login(string clientId, params string[] scopes)
     {
         // Create a space delimited list of scopes. 
         var sb = new StringBuilder("");
@@ -74,7 +77,7 @@ public static class DeviceFlow
 
         try
         {
-            HttpResponseMessage res = await GhClient.PostAsJsonAsync("https://github.com/login/device/code", loginCode, SnakeCaseOptions);
+            HttpResponseMessage res = await _http.PostAsJsonAsync("https://github.com/login/device/code", loginCode, SnakeCaseOptions);
             res.EnsureSuccessStatusCode();
             var loginResponse = await res.Content.ReadFromJsonAsync<LoginResponse>(SnakeCaseOptions);
             return loginResponse;
@@ -87,7 +90,7 @@ public static class DeviceFlow
     }
 
 
-    public static async Task<PollResponse?> Poll(string clientId, string deviceCode, int interval, bool s_keepRunning, CancellationTokenSource cts)
+    public async Task<PollResponse?> Poll(string clientId, string deviceCode, int interval, bool s_keepRunning, CancellationTokenSource cts)
     {
         // https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#step-3-app-polls-github-to-check-if-the-user-authorized-the-device
         string deviceAuthReqUrl = "https://github.com/login/oauth/access_token";
@@ -99,7 +102,7 @@ public static class DeviceFlow
         {
             try
             {
-                HttpResponseMessage res = await GhClient.PostAsJsonAsync(deviceAuthReqUrl, pollReq, SnakeCaseOptions);
+                HttpResponseMessage res = await _http.PostAsJsonAsync(deviceAuthReqUrl, pollReq, SnakeCaseOptions);
                 res.EnsureSuccessStatusCode();
 
                 var pollResponse = await res.Content.ReadFromJsonAsync<PollResponse>(SnakeCaseOptions);

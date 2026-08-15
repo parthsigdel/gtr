@@ -34,6 +34,7 @@ public static class Program
         Console.CancelKeyPress += Console_CancelKeyPress;
 
         ICredential accessToken = store.Get("gt", "accessToken");
+        var DeviceFlow = new DeviceFlow(GhClient);
 
         // If token does not exist, start the process to get token.  
         try

@@ -26,6 +26,21 @@ Your auth token stays local (on your machine). It is never sent to any server â€
 -> Mark notification as read (straight from your terminal).
 
 ## Installation
+
+### macOS / Linux
+
+```
+curl -fsSL https://raw.githubusercontent.com/parthsigdel/Gtr/main/install.sh | sh
+```
+
+### Windows (Powershell)
+
+```
+irm https://raw.githubusercontent.com/parthsigdel/Gtr/main/install.ps1 | iex
+```
+
+
+## Build from source 
 ### Requirements
 Requires - [.NET 10.0 SDK](https://dotnet.microsoft.com/download) or later
 

@@ -1,0 +1,65 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rid: osx-x64
+            os: darwin
+            arch: amd64
+          - rid: osx-arm64
+            os: darwin
+            arch: arm64
+          - rid: linux-x64
+            os: linux
+            arch: amd64
+          - rid: linux-arm64
+            os: linux
+            arch: arm64
+          - rid: win-x64
+            os: windows
+            arch: amd64
+          - rid: win-arm64
+            os: windows
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Publish
+        run: |
+          dotnet publish src/Gtr/Gtr.csproj -c Release -r ${{ matrix.rid }} \
+            --self-contained -p:PublishSingleFile=true \
+            -o out/${{ matrix.rid }}
+      - name: Package
+        run: |
+          mkdir -p dist
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            cd out/${{ matrix.rid }} && zip -r ../../dist/Gtr_${{ matrix.os }}_${{ matrix.arch }}.zip Gtr.exe && cd ../..
+          else
+            tar -czf dist/Gtr_${{ matrix.os }}_${{ matrix.arch }}.tar.gz -C out/${{ matrix.rid }} Gtr
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.rid }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*

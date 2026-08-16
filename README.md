@@ -30,13 +30,13 @@ Your auth token stays local (on your machine). It is never sent to any server â€
 ### macOS / Linux
 
 ```
-curl -fsSL https://raw.githubusercontent.com/parthsigdel/Gtr/main/install.sh | sh
+curl -fsSL https://sh.parthsigdel.com/gtr | sh
 ```
 
 ### Windows (Powershell)
 
 ```
-irm https://raw.githubusercontent.com/parthsigdel/Gtr/main/install.ps1 | iex
+irm https://sh.parthsigdel.com/gtr.ps1 | iex
 ```
 
 

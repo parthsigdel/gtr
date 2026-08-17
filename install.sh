@@ -26,7 +26,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "Downloading ${URL}..."
-curl -fsSL "$URL" -o "$TMP_DIR/$ARCHIVE"
+curl -fL --progress-bar "$URL" -o "$TMP_DIR/$ARCHIVE"
 
 tar -xzf "$TMP_DIR/$ARCHIVE" -C "$TMP_DIR"
 

@@ -18,7 +18,7 @@ Your auth token stays local (on your machine). It is never sent to any server â€
 - Open selected notification, issue, PR, or review in your browser
 - Close your PR or change it to draft from your terminal
 - View comments on your PR
-- Mark notification as read (straight from your terminal)## Installation
+- Mark notification as read (straight from your terminal)
 
 
 ## Installation 

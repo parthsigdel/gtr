@@ -22,7 +22,7 @@ public static class Program
         ICredentialStore store = CredentialManager.Create("gtApp");
         if (args.Length > 0)
         {
-            if (args[0] == "-rm")
+            if (args[0] == "--rm")
             {
                 bool deleted = store.Remove("gt", "accessToken");
                 if (deleted) Console.WriteLine("Access token removed");

@@ -19,27 +19,7 @@ public class DeviceFlow
         string clientId = "Ov23liKhf7NMmZouMr4T";
         string[] scopes = {
             "repo",
-            // "repo:status",
-            // "repo_deployment",
-            // "public_repo",
-            // "repo:invite",
-            // "security_events",
-            // "admin:repo_hook",
-            // "admin:org",
-            // "admin:public_key",
-            // "admin:org_hook",
-            // "gist",
             "notifications",
-            // "user",
-            // "project", 
-            // "delete_repo", // don't need this
-            // "write:packages",
-            // "read:packages", 
-            // "delete:packages", // don't need this
-            // "admin:gpg_key",
-            // "codespace",
-            // "workflow",
-            // "read:audit_log",
             "user"
         };
         var loginRes = await Login(clientId, scopes);
@@ -50,8 +30,7 @@ public class DeviceFlow
             Console.WriteLine("Please enter this code here: ");
             Console.WriteLine(" https://github.com/login/device ");
 
-            int interval = loginRes.Interval;
-            var pollRes = await Poll(clientId, loginRes.DeviceCode, interval, s_keepRunning, cts);
+            var pollRes = await Poll(clientId, loginRes.DeviceCode, loginRes.ExpiresIn, loginRes.Interval, cts);
             if (pollRes != null && pollRes.error == null)
             {
                 newAccessToken = pollRes.AccessToken;
@@ -90,16 +69,23 @@ public class DeviceFlow
     }
 
 
-    public async Task<PollResponse?> Poll(string clientId, string deviceCode, int interval, bool s_keepRunning, CancellationTokenSource cts)
+    public async Task<PollResponse?> Poll(string clientId, string deviceCode, int expiresIn, int interval, CancellationTokenSource cts)
     {
         // https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#step-3-app-polls-github-to-check-if-the-user-authorized-the-device
         string deviceAuthReqUrl = "https://github.com/login/oauth/access_token";
         string grantType = "urn:ietf:params:oauth:grant-type:device_code";
-
         var pollReq = new PollRequest(clientId, deviceCode, grantType);
 
-        while (true && s_keepRunning)
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(expiresIn);
+
+        while (true)
         {
+            if (DateTimeOffset.UtcNow >= deadline)
+            {
+                Console.WriteLine("Device code expired. Please run the command again.");
+                return null;
+            }
+
             try
             {
                 HttpResponseMessage res = await _http.PostAsJsonAsync(deviceAuthReqUrl, pollReq, SnakeCaseOptions);
@@ -128,8 +114,6 @@ public class DeviceFlow
                 return null;
             }
         }
-
-        return null;
     }
 }
 

@@ -20,6 +20,9 @@ Your auth token stays local (on your machine). It is never sent to any server â€
 - View comments on your PR
 - Mark notification as read (straight from your terminal)## Installation
 
+
+## Installation 
+
 ### macOS / Linux
 
 ```
